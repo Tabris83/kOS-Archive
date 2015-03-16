@@ -74,10 +74,21 @@ until mode = 0
 		wait 2.
 		until (SHIP:PERIAPSIS >= (Ipe *0.98)) AND (SHIP:PERIAPSIS <= (Ipe *1.02))
 		{
-			if SHIP:PERIAPSIS < (Ipe * 0.5) {set Tval to 1. set Sval to SHIP:PROGRADE -R(0,25,0). PRINT "LEVEL 1      " AT (0,6).}
-			else if SHIP:PERIAPSIS <= (Ipe * 0.75) {set Tval to 0.5. set Sval to SHIP:PROGRADE -R(0,15,0). PRINT "LEVEL 2      " AT (0,6).}
-			else if SHIP:PERIAPSIS <= (Ipe * 0.9) {set Tval to 0.25. set Sval to SHIP:PROGRADE -R(0,5,0). PRINT "LEVEL 3      " AT (0,6).}
-			else if SHIP:PERIAPSIS > Ipe  {set Tval to 0. set mode to 5. set Sval to SHIP:PROGRADE. PRINT "LEVEL 4      " AT (0,6).}			
+			if SHIP:PERIAPSIS < (Ipe * 0.5) {set Tval to 1. set Sval to SHIP:PROGRADE -R(0,30,0). PRINT "LEVEL 1      " AT (0,6).}
+			else if SHIP:PERIAPSIS <= (Ipe * 0.75) {set Tval to 0.5. set Sval to SHIP:PROGRADE -R(0,20,0). PRINT "LEVEL 2      " AT (0,6).}
+			else if SHIP:PERIAPSIS <= (Ipe * 0.9) {set Tval to 0.25. set Sval to SHIP:PROGRADE -R(0,10,0). PRINT "LEVEL 3      " AT (0,6).}
+			else if SHIP:PERIAPSIS > Ipe  {set Tval to 0. set mode to 5. set Sval to SHIP:PROGRADE. PRINT "LEVEL 4      " AT (0,6).}
+			if SHIP:PERIAPSIS >= Ipe AND (SHIP:PERIAPSIS <= (Ipe *1.02)) {set Tval to 0. set mode to 5.}
+		}
+	}
+	else if mode = 5
+	{
+		set t to (ETA:PERIAPSIS - 120).
+		until t >= 0
+		{
+			lock steering to heading(90,0).
+			set warp to 5.
+			if t >= 20 {set warp to 0. set mode to 6.}
 		}
 	}
 	
