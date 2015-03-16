@@ -1,0 +1,7 @@
+CLEARSCREEN.
+SAS OFF.
+SET THROTTLE TO 0.
+SWITCH TO 0.
+COPY launch.ks to 1.
+SWITCH TO 1.
+RUN launch.
