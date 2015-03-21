@@ -18,6 +18,7 @@ on ag10 {set mode to 1.}
 on abort {set mode to 0. set THROTTLE to 0.}
 on ag9 {set Tval to 1. LOCK STEERING TO HEADING(90,90).	STAGE. set mode to 2.}
 
+
 until mode = 0
 {
 	if mode = 1 //countdown
@@ -57,7 +58,7 @@ until mode = 0
 	else if mode = 3 //raise PE
 	{
 		set Sval to SHIP:PROGRADE.
-		WHEN (SHIP:ALTITUDE > BODY:ATM:HEIGHT) AND (ETA:APOAPSIS > 120) THEN
+		WHEN (SHIP:ALTITUDE > BODY:ATM:HEIGHT +5) AND (ETA:APOAPSIS > 120) THEN
 			{
 				set Wval to 3.
 			}
@@ -89,23 +90,25 @@ until mode = 0
 				if SHIP:PERIAPSIS < 0 {set Tval to 1.}
 				else if SHIP:PERIAPSIS > 0 AND SHIP:PERIAPSIS < Ipe * 0.75 {set Tval to 0.75.}
 				else if SHIP:PERIAPSIS > 0.76 AND SHIP:PERIAPSIS < Ipe * 0.9 {set Tval to 0.5.}
-				else if SHIP:PERIAPSIS >= Ipe {set Tval to 0. PRINT "Periapsis Raised to : " + round(SHIP:PERIAPSIS /1000,2) AT (0,6).}
-				if SHIP:PERIAPSIS >= Ipe {set flag to 1.}
-				//if Tval = 0 {set mode to 5.}
+				else if SHIP:PERIAPSIS >= Ipe {set Tval to 0. PRINT "Periapsis Raised to : " + round(SHIP:PERIAPSIS /1000,2) AT (0,7).}
 				LOCK THROTTLE to Tval.
-				PRINT "Throttle at: " + Tval +"                            " AT (0,6).
-			}
+				PRINT "Throttle at: " + Tval*100 +"%                            " AT (0,6).				
+			}			
 		}
-		WHEN flag <> 0 THEN {set mode to 5.}
+		WHEN SHIP:PERIAPSIS > Ipe THEN {set flag to 1. set mode to 5. set Tval to 0.}
+		if flag = 1 {set mode to 5. set Tval to 0.}
 	}
 	else if mode = 5
 	{
-		until t >= 0
+		until t <= 0
 		{
 			set t to (ETA:PERIAPSIS - 120).
-			lock steering to heading(90,0).
-			set warp to 4.
-			if t >= 20 {set warp to 0. set mode to 6.}
+			unlock steering.
+			wait 1.
+			set warp to 3.
+			PRINT "Warping to PE at Warp Mode 3" AT (0,6).
+			PRINT "Time to PE: " + t AT (0,7).
+			if t <= 20 {set warp to 0. lock steering to PROGRADE. set mode to 6.}
 		}
 	}
 	
@@ -121,15 +124,14 @@ until mode = 0
 	LOCK STEERING to Sval.
 	
 	//staging
-	IF STAGE:LIQUIDFUEL < 1 AND mode > 1
+	WHEN STAGE:LIQUIDFUEL < 1 AND mode > 1 THEN
 	{
 		set OTval to Tval.
 		set Tval to 0.
-		wait 0.5.
 		PRINT "Staging".
 		STAGE.
-		wait 1.
-		set Tval to OTval.		
+		set Tval to OTval.
+		preserve.
 	}
 	WHEN SHIP:LIQUIDFUEL < 1 THEN
 	{
