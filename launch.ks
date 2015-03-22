@@ -58,6 +58,7 @@ until mode = 0
 	else if mode = 3 //raise PE
 	{
 		set Sval to SHIP:PROGRADE.
+		
 		WHEN (SHIP:ALTITUDE > BODY:ATM:HEIGHT +5) AND (ETA:APOAPSIS > 120) THEN
 			{
 				set Wval to 3.
@@ -100,16 +101,7 @@ until mode = 0
 	}
 	else if mode = 5
 	{
-		until t <= 0
-		{
-			set t to (ETA:PERIAPSIS - 120).
-			unlock steering.
-			wait 1.
-			set warp to 3.
-			PRINT "Warping to PE at Warp Mode 3" AT (0,6).
-			PRINT "Time to PE: " + t AT (0,7).
-			if t <= 20 {set warp to 0. lock steering to PROGRADE. set mode to 6.}
-		}
+		run mission(mode,Fap,Fpe).
 	}
 	
 	//gui
@@ -124,14 +116,15 @@ until mode = 0
 	LOCK STEERING to Sval.
 	
 	//staging
-	WHEN STAGE:LIQUIDFUEL < 1 AND mode > 1 THEN
+	LIST ENGINES IN engines.
+	FOR eng IN engines
 	{
-		set OTval to Tval.
-		set Tval to 0.
-		PRINT "Staging".
-		STAGE.
-		set Tval to OTval.
-		preserve.
+		IF eng:FLAMEOUT
+		{
+			STAGE.
+			WAIT 0.1.
+			BREAK.
+		}
 	}
 	WHEN SHIP:LIQUIDFUEL < 1 THEN
 	{
